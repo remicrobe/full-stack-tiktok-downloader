@@ -1,0 +1,30 @@
+name: Deploying
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Run deploy.sh on remote server via sshpass
+        run: |
+          sshpass -p "${{ secrets.PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
+          cd full-stack-tiktok-downloader
+          git stash
+          git stash clear
+          git pull
+          pm2 stop tiktok-download
+          pm2 delete tiktok-download
+          npm install
+          pm2 start "npm run start" --name tiktok-download
+          EOF

@@ -40,7 +40,8 @@ export async function getUserVideos(username) {
             return links
                 .map(link => link.href)
                 .filter(href => videoPattern.test(href))
-                .filter((href, index, self) => self.indexOf(href) === index);
+                .filter((href, index, self) => self.indexOf(href) === index)
+                .slice(0, 20)
         }, username);
 
         await browser.close();
